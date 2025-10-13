@@ -61,7 +61,7 @@ The architecture is composed of three tiers:
 
 1.  **Clone the repository:**
     ```sh
-    git clone <your-repo-url>
+    git clone https://github.com/DungTMHE186884/2-tiers-high-availability-demo.git
     cd 2-tiers-high-availability-demo
     ```
 
@@ -106,4 +106,5 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     When you restart the original master, it will reclaim its `MASTER` role, and the backup will transition back to `BACKUP` state.
     ```sh
     docker start haproxy-tier1-master
+
     ```
