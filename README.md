@@ -8,7 +8,8 @@ The architecture is composed of three tiers:
 *   **Tier 3: Web Servers:** A cluster of simple Node.js web servers that represent the application backend.
 
  
-*(Note: You can create and link to an architecture diagram here for better visualization.)*
+<img width="2188" height="1131" alt="image" src="https://github.com/user-attachments/assets/77639ab2-c914-4cc5-bae9-cec2c3eb8648" />
+
 
 ---
 
@@ -108,3 +109,4 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     docker start haproxy-tier1-master
 
     ```
+
