@@ -1,4 +1,4 @@
-# 3-Tier High-Availability Web Architecture with HAProxy and Keepalived
+# 2-Tier High-Availability Web Architecture with HAProxy and Keepalived
 
 This project demonstrates a highly available, multi-tier web application architecture using Docker and Docker Compose. It is designed to be resilient to failures at both the web server and load balancer levels.
 
@@ -112,5 +112,6 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     docker start haproxy-tier1-master
 
     ```
+
 
 
