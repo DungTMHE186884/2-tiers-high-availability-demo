@@ -46,6 +46,7 @@ The architecture is composed of three tiers:
 │   └── haproxy.cfg
 ├── web-servers/
 │   ├── Dockerfile
+│   ├── package.json
 │   └── server.js            # Simple Node.js/Express app
 ├── docker-compose.yml       # Defines and orchestrates all services
 ├── Dockerfile
@@ -111,4 +112,5 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     docker start haproxy-tier1-master
 
     ```
+
 
