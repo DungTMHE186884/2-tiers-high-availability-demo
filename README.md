@@ -5,7 +5,7 @@ This project demonstrates a highly available, multi-tier web application archite
 The architecture is composed of three tiers:
 *   **Tier 1: High-Availability Load Balancers:** A pair of HAProxy load balancers (master and backup) configured with Keepalived for automatic failover using a Virtual IP (VIP). This is the single entry point for all user traffic.
 *   **Tier 2: Application Load Balancers:** A second layer of HAProxy instances that distribute traffic across the web servers. This layer allows for scaling the application tier independently.
-*   **Tier 3: Web Servers:** A cluster of simple Node.js web servers that represent the application backend.
+*   **Web Servers:** A cluster of simple Node.js web servers that represent the application backend.
 
  
 <img width="2188" height="1131" alt="image" src="https://github.com/user-attachments/assets/77639ab2-c914-4cc5-bae9-cec2c3eb8648" />
@@ -112,6 +112,7 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     docker start haproxy-tier1-master
 
     ```
+
 
 
 
