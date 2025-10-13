@@ -48,6 +48,8 @@ The architecture is composed of three tiers:
 │   ├── Dockerfile
 │   └── server.js            # Simple Node.js/Express app
 ├── docker-compose.yml       # Defines and orchestrates all services
+├── Dockerfile
+├── entrypoint.sh
 └── README.md                # This file
 ```
 
