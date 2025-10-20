@@ -1,25 +1,23 @@
-# 2-Tier High-Availability Web Architecture with HAProxy and Keepalived
+# High-Availability Web Architecture with HAProxy and Keepalived
 
 This project demonstrates a highly available, multi-tier web application architecture using Docker and Docker Compose. It is designed to be resilient to failures at both the web server and load balancer levels.
 
-The architecture is composed of three tiers:
-*   **Tier 1: High-Availability Load Balancers:** A pair of HAProxy load balancers (master and backup) configured with Keepalived for automatic failover using a Virtual IP (VIP). This is the single entry point for all user traffic.
-*   **Tier 2: Application Load Balancers:** A second layer of HAProxy instances that distribute traffic across the web servers. This layer allows for scaling the application tier independently.
-*   **Web Servers:** A cluster of simple Node.js web servers that represent the application backend.
+The architecture is composed of two main tiers:
+*   **Tier 1: High-Availability Load Balancers:** A cluster of three HAProxy load balancers (one master, two backups) configured with Keepalived. They share a single Virtual IP (VIP) to provide a consistent entry point for all user traffic. If the master node fails, a backup node automatically takes over, ensuring seamless service continuity.
+*   **Tier 2: Web Servers:** A pool of identical Node.js web servers that run the application logic. The HAProxy tier distributes incoming requests across these servers.
 
  
-<img width="2188" height="1131" alt="image" src="https://github.com/user-attachments/assets/77639ab2-c914-4cc5-bae9-cec2c3eb8648" />
+<img width="1400" alt="Project Architecture Diagram" src="https://user-images.githubusercontent.com/10108698/229329438-1a88b3a3-3a81-43e0-94cf-78931b794a3a.png" />
 
 
 ---
 
 ## Features
 
-*   **High Availability:** Keepalived ensures that if the master Tier-1 load balancer fails, the backup instance automatically takes over the Virtual IP, providing seamless failover with no downtime.
+*   **High Availability:** Keepalived ensures that if the master load balancer fails, a backup instance automatically takes over the Virtual IP, providing seamless failover with no downtime.
 *   **Scalability:** The multi-tier design allows for independent scaling of the web server and load balancing layers.
 *   **Load Balancing:**
-    *   Tier 1 uses a `round-robin` strategy to distribute traffic between the Tier 2 load balancers.
-    *   Tier 2 uses a `least-connections` strategy to send requests to the least busy web server.
+    *   HAProxy uses the `leastconn` (least connections) algorithm to distribute traffic, sending new requests to the web server with the fewest active connections.
 *   **Containerized:** The entire stack is defined in `docker-compose.yml` for easy setup and deployment.
 *   **Monitoring:** Each HAProxy instance exposes a statistics page for real-time monitoring of traffic and server health.
 
@@ -27,23 +25,22 @@ The architecture is composed of three tiers:
 
 ## Project Structure
 
-```
-├── haproxy-tier1-backup/
+```text
+├── haproxy-master/
 │   ├── Dockerfile
 │   ├── entrypoint.sh
 │   ├── haproxy.cfg
-│   └── keepalived.conf      # Configures the BACKUP Keepalived node
-├── haproxy-tier1-master/
+│   └── keepalived.conf      
+├── haproxy-backup-1/
 │   ├── Dockerfile
 │   ├── entrypoint.sh
 │   ├── haproxy.cfg
-│   └── keepalived.conf      # Configures the MASTER Keepalived node
-├── haproxy-tier2-1/
+│   └── keepalived.conf      
+├── haproxy-backup-2/
 │   ├── Dockerfile
-│   └── haproxy.cfg
-├── haproxy-tier2-2/
-│   ├── Dockerfile
-│   └── haproxy.cfg
+│   ├── entrypoint.sh
+│   ├── haproxy.cfg
+│   └── keepalived.conf      
 ├── web-servers/
 │   ├── Dockerfile
 │   ├── package.json
@@ -81,24 +78,23 @@ The architecture is composed of three tiers:
 
 4.  **View HAProxy Statistics:**
     You can monitor the status of each load balancer via their statistics pages.
-    *   **Tier 1 (Master):** `http://localhost/haproxy?stats` (Username: `admin`, Password: `123`)
-    *   **Tier 1 (Backup):** `http://localhost:8080/haproxy?stats` (Username: `admin`, Password: `123`)
-    *   **Tier 2 (Instance 1):** `http://localhost:8081/haproxy?stats`
-    *   **Tier 2 (Instance 2):** `http://localhost:8082/haproxy?stats`
+    *   **Master LB:** `http://localhost/haproxy?stats` (Username: `admin`, Password: `123`)
+    *   **Backup LB 1:** `http://localhost:8080/haproxy?stats` (Username: `admin`, Password: `123`)
+    *   **Backup LB 2:** `http://localhost:8081/haproxy?stats` (Username: `admin`, Password: `123`)
 
 ---
 
 ## Testing High Availability
 
-You can test the failover mechanism by stopping the master Tier-1 load balancer.
+You can test the failover mechanism by stopping the master load balancer.
 
 1.  **Stop the master container:**
     ```sh
-    docker stop haproxy-tier1-master
+    docker stop haproxy-master
     ```
 
 2.  **Check the application:**
-    Refresh your browser at `http://localhost`. The application should still be accessible without any interruption. The `haproxy-tier1-backup` container has now taken over the Virtual IP and is routing traffic.
+    Refresh your browser at `http://localhost`. The application should still be accessible without any interruption. One of the backup containers has now taken over the Virtual IP and is routing traffic.
 
 3.  **Verify with logs:**
     You can check the logs of the backup container to see the state transition from `BACKUP` to `MASTER`.
@@ -106,13 +102,9 @@ You can test the failover mechanism by stopping the master Tier-1 load balancer.
     docker logs haproxy-tier1-backup
     ```
 
-4.  **Bring the master back online:**
+4.  **Restart the master:**
     When you restart the original master, it will reclaim its `MASTER` role, and the backup will transition back to `BACKUP` state.
     ```sh
-    docker start haproxy-tier1-master
-
+    docker start haproxy-master
     ```
-
-
-
-
+    

@@ -1,5 +1,5 @@
 services:
-  # === WEB SERVERS (TIER 3) ===
+  # === WEB SERVERS ===
   web1:
     build: ./web-servers
     container_name: web1
@@ -14,44 +14,10 @@ services:
     networks:
       - app-network
 
-  web3:
-    build: ./web-servers
-    container_name: web3
-    hostname: web3
-    networks:
-      - app-network
-
-  # === APPLICATION LOAD BALANCERS (TIER 2) ===
-  haproxy-tier2-1:
-    build: ./haproxy-tier2-1
-    container_name: haproxy-tier2-1
-    ports:
-      - "8081:80"
-    networks:
-      - app-network
-    # Ensures web servers are started before this load balancer tries to connect to them.
-    depends_on:
-      web1: { condition: service_started }
-      web2: { condition: service_started }
-      web3: { condition: service_started }
-
-  haproxy-tier2-2:
-    build: ./haproxy-tier2-2
-    container_name: haproxy-tier2-2
-    ports:
-      - "8082:80"
-    networks:
-      - app-network
-    # Ensures web servers are started before this load balancer tries to connect to them.
-    depends_on:
-      web1: { condition: service_started }
-      web2: { condition: service_started }
-      web3: { condition: service_started }
-
-  # === HIGH-AVAILABILITY LOAD BALANCERS (TIER 1) ===
-  haproxy-tier1-master:
-    build: ./haproxy-tier1-master
-    container_name: haproxy-tier1-master
+  # === HIGH-AVAILABILITY LOAD BALANCERS ===
+  haproxy-master:
+    build: ./haproxy-master
+    container_name: haproxy-master
     # Exposes the main application entrypoint on the host's port 80.
     ports:
       - "80:80"
@@ -63,12 +29,12 @@ services:
       - app-network
     # Ensures the tier-2 load balancers are started before this one.
     depends_on:
-      haproxy-tier2-1: { condition: service_started }
-      haproxy-tier2-2: { condition: service_started }
+      web1: { condition: service_started }
+      web2: { condition: service_started }
 
-  haproxy-tier1-backup:
-    build: ./haproxy-tier1-backup
-    container_name: haproxy-tier1-backup
+  haproxy-backup-1:
+    build: ./haproxy-backup-1
+    container_name: haproxy-backup-1
     ports:
       # Expose the backup's stats page on a different host port for debugging.
       - "8080:80"
@@ -80,8 +46,25 @@ services:
       - app-network
     # Ensures the tier-2 load balancers are started before this one.
     depends_on:
-      haproxy-tier2-1: { condition: service_started }
-      haproxy-tier2-2: { condition: service_started }
+      web1: { condition: service_started }
+      web2: { condition: service_started }
+
+  haproxy-backup-2:
+    build: ./haproxy-backup-2
+    container_name: haproxy-backup-2
+    ports:
+      # Expose the backup's stats page on a different host port for debugging.
+      - "8081:80"
+    # Grants the container extra capabilities required by Keepalived.
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - app-network
+    # Ensures the tier-2 load balancers are started before this one.
+    depends_on:
+      web1: { condition: service_started }
+      web2: { condition: service_started }
 
 networks:
   app-network:
