@@ -109,4 +109,6 @@ You can test the failover mechanism by stopping the master load balancer.
     docker start haproxy-master
     ```
     
+## Additional Document About How To Apply In Real Severs
+   https://docs.google.com/document/d/10KyGZO24O_ResiKpg0b-hFr1O75ufEsSMDeAT0QN7QE/edit?usp=sharing (Vietnamese)
 
